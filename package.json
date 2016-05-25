@@ -1,0 +1,40 @@
+{
+  "name": "jstyle-cli",
+  "version": "0.1.0",
+  "bin": {
+    "jstyle": "index.js"
+  },
+  "description": "Javascript to css compiler CLI",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Boris Kaul",
+    "email": "localvoid@gmail.com",
+    "url": "https://github.com/localvoid"
+  },
+  "keywords": [
+    "css",
+    "js",
+    "browser"
+  ],
+  "homepage": "https://github.com/localvoid/jstyle-cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/localvoid/jstyle-cli"
+  },
+  "bugs": {
+    "url": "https://github.com/localvoid/jstyle-cli/issues"
+  },
+  "github": "https://github.com/localvoid/jstyle-cli",
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "jstyle": "^0.2.0"
+  },
+  "dependencies": {
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "resolve": "^1.1.7"
+  }
+}
