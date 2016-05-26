@@ -77,45 +77,21 @@ class Compiler {
     this.passes = [jstyle.flattenProperties, jstyle.uniqueProperties, jstyle.cleanTree];
   }
 
-  compileEntries(entries) {
-    const results = [];
-    const entryFileNames = Object.keys(entries);
-    for (let i = 0; i < entryFileNames.length; i++) {
-      const fileName = entryFileNames[i];
-      const entry = entries[fileName];
-
-      // bundle
-      let rules = jstyle.bundle(entry, this.context);
-
-      // apply transformations
-      for (let i = 0; i < this.passes.length; i++) {
-        let newRules = [];
-        for (let j = 0; j < rules.length; j++) {
-          const rule = this.passes[i](rules[j]);
-          if (rule !== null) {
-            newRules.push(rule);
-          }
-        }
-        rules = newRules;
-      }
-
-      // emit css
-      const result = rules.map((r) => jstyle.emitCss(r)).join("");
-
-      results.push(new CompiledEntry(fileName, result));
-    }
+  compile(chunks, baseChunkFileName) {
+    const artifact = jstyle.compile(chunks, this.context, jstyle.DefaultCompilationPasses, baseChunkFileName);
 
     return new Promise((resolve, reject) => {
       let i = 0;
       const next = () => {
-        if (i < results.length) {
-          const entryResult = results[i++];
-          const fullDirPath = path.join(outputPath, path.dirname(entryResult.fileName));
+        if (i < artifact.chunks.length) {
+          const compiledChunk = artifact.chunks[i++];
+
+          const fullDirPath = path.join(outputPath, path.dirname(compiledChunk.fileName));
           mkdirp(fullDirPath, (err) => {
             if (err) {
              reject(err);
             } else {
-              fs.writeFile(path.join(outputPath, entryResult.fileName), entryResult.result, next);
+              fs.writeFile(path.join(outputPath, compiledChunk.fileName), compiledChunk.content, next);
             }
           });
         } else {
@@ -171,20 +147,23 @@ const context = new jstyle.Context({
 });
 const compiler = new Compiler(context);
 
-if (config.entries) {
-  let next = compiler.compileEntries(config.entries);
+if (config.chunks) {
+  let next = compiler.compile(config.chunks, config.baseChunkFileName || "base.css");
+
   if (config.minifyTagNames !== undefined) {
     const fileName = (typeof config.minifyTagNames === "string") ?
       config.minifyTagNames :
       "tag_names.json";
     next = next.then((c) => c.writeTagNames(path.join(outputPath, fileName)));
   }
+
   if (config.minifyClassNames !== undefined) {
     const fileName = (typeof config.minifyClassNames === "string") ?
       config.minifyClassNames :
       "class_names.json";
     next = next.then((c) => c.writeClassNames(path.join(outputPath, fileName)));
   }
+
   next.then(() => process.exit(0));
 } else {
   process.exit(0);
