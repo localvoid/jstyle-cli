@@ -11,9 +11,9 @@ const resolve = require("resolve");
 
 let jstylePath;
 try {
-  jstylePath = resolve.sync("jstyle", { baseDir: process.cwd() })
+  jstylePath = resolve.sync("jstyle", { basedir: process.cwd() });
 } catch (e) {
-  process.stdout.write("Unable to find local jstyle.");
+  process.stdout.write("Unable to find local jstyle.\n");
   process.exit(1);
 }
 const jstyle = require(jstylePath);
