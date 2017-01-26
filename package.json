@@ -1,6 +1,6 @@
 {
   "name": "jstyle-cli",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "bin": {
     "jstyle": "index.js"
   },
@@ -30,7 +30,7 @@
     "README.md"
   ],
   "peerDependencies": {
-    "jstyle": "^0.2.0"
+    "jstyle": "^0.3.0"
   },
   "dependencies": {
     "minimist": "^1.2.0",
