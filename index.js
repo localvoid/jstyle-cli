@@ -71,35 +71,33 @@ class CompiledEntry {
     }
 }
 
-class Compiler {
-    constructor(context) {
-        this.context = context;
-    }
+function compile(chunks, env, postcss, baseChunkFileName) {
+    return jstyle.compile(chunks, env, postcss, baseChunkFileName)
+        .then((artifact) => {
+            return new Promise((resolve, reject) => {
+                let i = 0;
+                const next = () => {
+                    if (i < artifact.chunks.length) {
+                        const compiledChunk = artifact.chunks[i++];
 
-    compile(chunks, baseChunkFileName) {
-        const artifact = jstyle.compile(chunks, this.context, jstyle.DefaultCompilationPasses, baseChunkFileName);
-
-        return new Promise((resolve, reject) => {
-            let i = 0;
-            const next = () => {
-                if (i < artifact.chunks.length) {
-                    const compiledChunk = artifact.chunks[i++];
-
-                    const fullDirPath = path.join(outputPath, path.dirname(compiledChunk.fileName));
-                    mkdirp(fullDirPath, (err) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            fs.writeFile(path.join(outputPath, compiledChunk.fileName), compiledChunk.content, next);
-                        }
-                    });
-                } else {
-                    resolve(this);
-                }
-            };
-            next();
+                        const fullDirPath = path.join(outputPath, path.dirname(compiledChunk.fileName));
+                        mkdirp(fullDirPath, (err) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                fs.writeFile(
+                                    path.join(outputPath, compiledChunk.fileName),
+                                    compiledChunk.content,
+                                    next);
+                            }
+                        });
+                    } else {
+                        resolve(this);
+                    }
+                };
+                next();
+            });
         });
-    }
 }
 
 const configModule = require(configPath);
@@ -110,13 +108,9 @@ if (env !== undefined) {
         env = env(defs);
     }
 }
-const context = new jstyle.Context({
-    env: env,
-});
-const compiler = new Compiler(context);
 
 if (config.chunks) {
-    compiler.compile(config.chunks, config.baseChunkFileName || "base.css")
+    compile(config.chunks, env, config.postcss, config.baseChunkFileName)
         .then(() => process.exit(0));
 } else {
     process.exit(0);
